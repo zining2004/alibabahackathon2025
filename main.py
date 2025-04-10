@@ -38,6 +38,7 @@ def login():
 
         try:
             conn = get_connection()
+            print("Connected to database")
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, password))
             user = cursor.fetchone()
@@ -66,8 +67,14 @@ def register():
         try:
             conn = get_connection()
             cursor = conn.cursor()
+            print("Connected to database")
 
             # Check for duplicate username or email
+            cursor.execute("SELECT DATABASE();")
+            print("Connected DB:", cursor.fetchone())
+            cursor.execute("SHOW TABLES;")
+            print("Tables:", cursor.fetchall())
+
             cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
             existing_user = cursor.fetchone()
 
@@ -117,9 +124,12 @@ def upload():
     summary = summaryfunction(all_text)
     script = audiofunction(all_text)
     scene_and_summary = videofunction(all_text)
+    print("Scene and Summary:", scene_and_summary)
+    print("Summary:", summary)
+    print("Script:", script)
     generateaudio(script)
-    generatevideo(scene_and_summary)
-    generatecomic(scene_and_summary)
+    #generatevideo(scene_and_summary)
+    #generatecomic(scene_and_summary)
 
     return jsonify({
         "summary": summary,
@@ -132,7 +142,7 @@ def upload():
 def videofunction(text):
     try:
         client2 = OpenAI(
-        api_key="", #generate scenes and summary API
+        api_key="sk-ca96cedce775437a864a0d4f26fce184", #generate scenes and summary API
         base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
         )
         completion2 = client2.chat.completions.create(
