@@ -8,13 +8,18 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 from gtts import gTTS
 import mysql.connector
 from db_config import DB_CONFIG
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 
 client = OpenAI(
-    api_key="sk-0dcf4b20d5b0499c81cb99b382235dca",
+    api_key="sk-0dcf4b20d5b0499c81cb99b382235dca", #generate summary API
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
 )
+
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def get_connection():
     return mysql.connector.connect(**DB_CONFIG)
@@ -97,7 +102,12 @@ def upload():
     if not file:
         return jsonify({"error": "No file uploaded."}), 400
 
-    reader = PdfReader(file)
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(file_path)  # ✅ Save the uploaded file
+
+    # Extract text from saved PDF
+    reader = PdfReader(file_path)
     all_text = ""
     for page in reader.pages:
         text = page.extract_text()
@@ -106,18 +116,37 @@ def upload():
 
     summary = summaryfunction(all_text)
     script = audiofunction(all_text)
+    scene_and_summary = videofunction(all_text)
     generateaudio(script)
-    generatevideo(summary)
+    generatevideo(scene_and_summary)
+    generatecomic(scene_and_summary)
 
     return jsonify({
         "summary": summary,
+        "filename": filename,
         "status": "Video and audio generated successfully."
     })
 
 
 # === FUNCTIONS ===
+def videofunction(text):
+    try:
+        client2 = OpenAI(
+        api_key="", #generate scenes and summary API
+        base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        )
+        completion2 = client2.chat.completions.create(
+            model="qwen-plus",
+            messages=[
+                {'role': 'system', 'content': 'You are a helpful assistant.'},
+                {'role': 'user', 'content': 'Give me scenes for a video regarding: ' + text}
+            ]
+        )
+        return completion2.choices[0].message.content
+    except Exception as e:
+        return f"Error during scene generation: {e}"
 
-def summaryfunction(text):
+def summaryfunction(text): #generate summary
     try:
         completion = client.chat.completions.create(
             model="qwen-plus",
@@ -151,25 +180,10 @@ def generateaudio(text):
         print(f"Audio generation error: {e}")
 
 def generatevideo(text):
-    try:
-        model_id = "Wan-AI/Wan2.1-T2V-14B-Diffusers"
-        vae = AutoencoderKLWan.from_pretrained(model_id, subfolder="vae", torch_dtype=torch.float32)
-        pipe = WanPipeline.from_pretrained(model_id, vae=vae, torch_dtype=torch.bfloat16)
-        pipe.to("cuda")
+    pass
 
-        output = pipe(
-            prompt=text,
-            negative_prompt="low quality, bad anatomy, poorly drawn, static",
-            height=480,
-            width=832,
-            num_frames=81,
-            guidance_scale=5.0
-        ).frames[0]
-
-        export_to_video(output, "static/output.mp4", fps=15)
-    except Exception as e:
-        print(f"Video generation error: {e}")
-
+def generatecomic(text):
+    pass
 
 if __name__ == '__main__':
     app.run(debug=True)
