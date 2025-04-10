@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h2>Welcome, {{ username }}!</h2>
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <h3>Upload a PDF</h3>
+    <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+        <input type="file" name="pdf_file" accept=".pdf" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if pdf_text %}
+        <h3>Extracted Text:</h3>
+        <pre>{{ pdf_text }}</pre>
+    {% endif %}
+</body>
+</html>
