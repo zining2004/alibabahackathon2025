@@ -4,14 +4,16 @@ from PyPDF2 import PdfReader
 from diffusers import AutoencoderKLWan, WanPipeline
 from diffusers.utils import export_to_video
 import torch
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from gtts import gTTS
 import mysql.connector
 from db_config import DB_CONFIG
 from werkzeug.utils import secure_filename
 import os
+import markdown
 
 app = Flask(__name__)
+app.secret_key = 'super-secret-key-please-change-this'
 
 client = OpenAI(
     api_key="sk-0dcf4b20d5b0499c81cb99b382235dca", #generate summary API
@@ -25,6 +27,10 @@ def get_connection():
     return mysql.connector.connect(**DB_CONFIG)
 
 # === ROUTES ===
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('login'))
 
 @app.route('/')
 def home():
@@ -47,6 +53,7 @@ def login():
             conn.close()
 
             if user:
+                session['username'] = username
                 return redirect(url_for('upload_page'))
             else:
                 return render_template('loginpage.html', error="Invalid credentials")
@@ -101,6 +108,8 @@ def register():
 
 @app.route('/uploadpage')
 def upload_page():
+    if 'username' not in session:
+        return redirect(url_for('login'))
     return render_template('upload.html')
 
 @app.route('/upload', methods=['POST'])
@@ -121,7 +130,8 @@ def upload():
         if text:
             all_text += text + "\n"
 
-    summary = summaryfunction(all_text)
+    summary_raw = summaryfunction(all_text)
+    summary = markdown.markdown(summary_raw)
     script = audiofunction(all_text)
     scene_and_summary = videofunction(all_text)
     print("Scene and Summary:", scene_and_summary)
@@ -131,11 +141,7 @@ def upload():
     #generatevideo(scene_and_summary)
     #generatecomic(scene_and_summary)
 
-    return jsonify({
-        "summary": summary,
-        "filename": filename,
-        "status": "Video and audio generated successfully."
-    })
+    return render_template('upload.html', summary=summary)
 
 
 # === FUNCTIONS ===

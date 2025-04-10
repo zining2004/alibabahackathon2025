@@ -5,21 +5,27 @@
   <title>DocToVideo</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 font-sans">
-  <div class="flex h-full">
-    
+<body class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 font-sans relative">
+
+  <!-- 🔓 Logout Button -->
+  <div class="absolute top-6 right-8">
+    <a href="/logout" class="text-sm bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow transition">
+      Logout
+    </a>
+  </div>
+
+  <div class="flex h-screen">
     <!-- Sidebar: History -->
-    <aside class="w-1/5 bg-white border-r p-6 shadow-md">
+    <aside class="w-1/5 h-full bg-white border-r p-6 shadow-md flex flex-col justify-between">
       <h2 class="text-2xl font-bold text-blue-600 mb-6">📚 History</h2>
       <ul id="history" class="space-y-3 text-sm">
-        <!-- Dynamic upload history -->
         <li class="text-blue-500 hover:underline cursor-pointer">example.pdf</li>
         <li class="text-blue-500 hover:underline cursor-pointer">notes.docx</li>
       </ul>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col p-10 space-y-8 overflow-hidden">
+    <main class="flex-1 flex flex-col p-10 space-y-8 overflow-y-auto">
       
       <!-- Upload Box -->
       <section class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
@@ -27,18 +33,41 @@
         <form id="uploadForm" method="POST" action="/upload" class="flex flex-col sm:flex-row items-center gap-4" enctype="multipart/form-data">
           <input type="file" name="document" class="border border-gray-300 p-3 rounded-md w-full sm:w-auto" required>
           <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md shadow-md transition">
-            Generate Video 🎨
+            Generate 🎨
           </button>
         </form>
       </section>
 
-      <!-- Comic Output -->
-      <section class="bg-white rounded-2xl shadow-xl p-8 flex-1 overflow-auto border border-gray-100">
-        <h2 class="text-xl font-semibold mb-4">🖼️ Video Output</h2>
+      <form id="uploadForm" method="POST" action="/upload" class="..." enctype="multipart/form-data">
+        
+        <!-- Output Type Button Group -->
+<div class="flex flex-wrap gap-4 mt-4 mb-8">
+  <input type="hidden" name="outputType" id="outputType" value="video">
+
+  <button type="button" data-value="video" class="output-btn bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 active">
+    🎥 Video
+  </button>
+  <button type="button" data-value="comic" class="output-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-300">
+    📚 Comic
+  </button>
+</div> 
+
+    <!-- Summary Section -->
+<section class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mt-8 mb-8">
+  <h2 class="text-xl font-semibold mb-4">📝 Summary</h2>
+  <div class="text-gray-700 leading-relaxed">
+    {{ summary | safe }}
+  </div>
+</section>
+
+
+      <!-- Output -->
+      <section class="bg-white rounded-2xl shadow-xl p-8 flex-1 overflow-auto border border-gray-100 mt-8">
+        <h2 class="text-xl font-semibold mb-4">🖼️ Video/Comic Output</h2>
         <div id="comicOutput" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Generated comic panels -->
+          <!-- Generated panels -->
           <div class="border rounded-lg p-6 text-center text-gray-400 italic">
-            No comic generated yet. Upload a file to get started!
+            No comic/video generated yet. Upload a file to get started!
           </div>
         </div>
       </section>
@@ -47,8 +76,3 @@
   </div>
 </body>
 </html>
-
-
-
-
-
