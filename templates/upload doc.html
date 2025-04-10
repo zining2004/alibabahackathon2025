@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DocToComic</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 font-sans">
+  <div class="flex h-full">
+    
+    <!-- Sidebar: History -->
+    <aside class="w-1/5 bg-white border-r p-6 shadow-md">
+      <h2 class="text-2xl font-bold text-blue-600 mb-6">📚 History</h2>
+      <ul id="history" class="space-y-3 text-sm">
+        <!-- Dynamic upload history -->
+        <li class="text-blue-500 hover:underline cursor-pointer">example.pdf</li>
+        <li class="text-blue-500 hover:underline cursor-pointer">notes.docx</li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col p-10 space-y-8 overflow-hidden">
+      
+      <!-- Upload Box -->
+      <section class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <h2 class="text-xl font-semibold mb-4">📤 Upload Your Document</h2>
+        <form id="uploadForm" class="flex flex-col sm:flex-row items-center gap-4" enctype="multipart/form-data">
+          <input type="file" name="document" class="border border-gray-300 p-3 rounded-md w-full sm:w-auto" required>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md shadow-md transition">
+            Generate Comic 🎨
+          </button>
+        </form>
+      </section>
+
+      <!-- Comic Output -->
+      <section class="bg-white rounded-2xl shadow-xl p-8 flex-1 overflow-auto border border-gray-100">
+        <h2 class="text-xl font-semibold mb-4">🖼️ Comic Output</h2>
+        <div id="comicOutput" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Generated comic panels -->
+          <div class="border rounded-lg p-6 text-center text-gray-400 italic">
+            No comic generated yet. Upload a file to get started!
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>
+
+
+
+
+
